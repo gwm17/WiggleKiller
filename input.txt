@@ -1,0 +1,12 @@
+InputData: /data1/gwm17/10B3He/Feb2021/analyzed/run_123.root
+OutputData: /data1/gwm17/10B3He/Feb2021/test_123_singleKiller.root
+EdeCutFile: /data1/gwm17/10B3He/edeCut_deuts.root
+XXCutFile: /data1/gwm17/10B3He/xxCut_deuts.root
+FrontLeftCalibration: ./etc/t1lcal_testing_barf.txt
+FrontRightCalibration: ./etc/t1rcal_testing_barf.txt
+BackLeftCalibration: ./etc/t2lcal_testing_barf.txt
+BackRightCalibration: ./etc/t2rcal_testing_barf.txt
+LambdaFront: 550.0
+LambdaBack: 500.0
+BulkData: /data1/gwm17/10B3He/run_103.root
+CleanedDataOutput: /data1/gwm17/10B3He/Feb2021/run_103_merged_wkilled_splinetest.root

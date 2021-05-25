@@ -1,0 +1,10 @@
+*.png
+*.root
+wkill
+*.o
+*.sublime-project
+*.sublime-workspace
+*.pcm
+images/
+
+!.gitignore
