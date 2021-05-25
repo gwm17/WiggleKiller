@@ -1,4 +1,4 @@
-#WiggleKiller
+# WiggleKiller
 WiggleKiller is a program designed to address differential non-linearity in the SESPS focal plane detector position spectrum (henceforth and forevermore known as the dreaded wiggles). The priciple is that the DNL can be found as
 deviations in the PSD vs. time for each delay line signal. This can then be calibrated away using the following relation:
 
@@ -14,13 +14,13 @@ optimization/determination to find a new calibration. The final product can eith
 
 Data is assumed to be of the type given from the GWM_EventBuilder SPS program. Additionally, cuts will be applied to the data, and the final calibrated data file will have these cuts applied (i.e. permanently cut on particle ID).  
 
-##Optimization method
+## Optimization method
 Optimization is done using a simulated annealing method. The optimization parameter is the peak-to-trough height of one of the wiggles (but better parameters ar being tested). The peak and trough location are manually entered into the
 code in the WiggleKiller.cpp file. Simulated annealing is slower than other methods, however it requires very little knowledge/assumptions about the shape of the function to be minimized, and does a better job approaching a global
 minimum than other simple methods such as a Golden-Section Search.
 
 
-##Building and Execution
+## Building and Execution
 To build WiggleKiller simply run
 
 make
