@@ -27,13 +27,13 @@ make
 
 from the top level directory. To run WiggleKiller use the following command structure:
 
-./bin/wkill --<option> input.txt
+./bin/wkill `--<option>` input.txt
 
---<option> is one of the following options:
+`--<option>` is one of the following options:
 
-kill: runs the single-shot correction of the lambda values in the input file. 
-optimize: runs the optimization using the initial guess of the lambda values in the input file. 
-clean: generates a cleaned-up data file with a ROOT tree using the calibration files specified in the input file.
-clean-no-tree: generated a cleaned-up data file with only histograms (no ROOT tree) using the calibration files specified in the input file. 
+1. kill: runs the single-shot correction of the lambda values in the input file. 
+2. optimize: runs the optimization using the initial guess of the lambda values in the input file. 
+3. clean: generates a cleaned-up data file with a ROOT tree using the calibration files specified in the input file.
+4. clean-no-tree: generated a cleaned-up data file with only histograms (no ROOT tree) using the calibration files specified in the input file. 
 
 An example input file is included. The input specifies directory locations for input data and output data.
