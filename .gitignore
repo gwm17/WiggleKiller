@@ -6,5 +6,9 @@ wkill
 *.sublime-workspace
 *.pcm
 images/
+.vscode/
+lib/
+bin/
+build/
 
 !.gitignore
