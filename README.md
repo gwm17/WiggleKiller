@@ -21,13 +21,17 @@ minimum than other simple methods such as a Golden-Section Search.
 
 
 ## Building and Execution
-To build WiggleKiller simply run
+WiggleKiller uses CMake. To build WiggleKiller run the following from the repository directory:
 
+```
+mkdir build
+cd build
+cmake ..
 make
+```
+To run WiggleKiller use the following command structure:
 
-from the top level directory. To run WiggleKiller use the following command structure:
-
-./bin/wkill `--<option>` input.txt
+./bin/WiggleKiller `--<option>` input.txt
 
 `--<option>` is one of the following options:
 

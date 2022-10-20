@@ -332,7 +332,7 @@ std::pair<double,double> WiggleKiller::MinimizeSimAnneal() {
 	}
 	std::cout<<std::endl;
 
-	return make_pair(cur_lambda1, cur_lambda2);
+	return std::make_pair(cur_lambda1, cur_lambda2);
 }
 
 void WiggleKiller::OptimizeParameters(std::string& inname, std::string& outname) {
@@ -603,7 +603,7 @@ void WiggleKiller::OptimizeParameters(std::string& inname, std::string& outname)
 	TGraph** graphs = new TGraph*[4];
 	for(int i=0; i<4; i++) {
 		auto& avgs = delayBinnedAvgPSD[i];
-		std::string name = "delay"+to_string(i)+"_avgPSDgraph";
+		std::string name = "delay"+std::to_string(i)+"_avgPSDgraph";
 		graphs[i] = new TGraph(nbins, &(delaytimes[0]), &(avgs[0]));
 		graphs[i]->SetName(name.c_str());
 		graphs[i]->SetTitle(name.c_str());
@@ -854,7 +854,7 @@ void WiggleKiller::ApplyLambdas(std::string& inname, std::string& outname) {
 	TGraph** graphs = new TGraph*[4];
 	for(int i=0; i<4; i++) {
 		auto& avgs = delayBinnedAvgPSD[i];
-		std::string name = "delay"+to_string(i)+"_avgPSDgraph";
+		std::string name = "delay"+std::to_string(i)+"_avgPSDgraph";
 		graphs[i] = new TGraph(nbins, &(delaytimes[0]), &(avgs[0]));
 		graphs[i]->SetName(name.c_str());
 		graphs[i]->SetTitle(name.c_str());
