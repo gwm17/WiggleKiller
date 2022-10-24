@@ -35,8 +35,8 @@ To run WiggleKiller use the following command structure:
 
 `--<option>` is one of the following options:
 
-1. kill: runs the single-shot correction of the lambda values in the input file. 
-2. optimize: runs the optimization using the initial guess of the lambda values in the input file. 
+1. kill-manual: runs the single-shot correction of the lambda values in the input file. 
+2. kill-optimize: runs the optimization using the initial guess of the lambda values in the input file. 
 3. clean: generates a cleaned-up data file with a ROOT tree using the calibration files specified in the input file.
 4. clean-no-tree: generated a cleaned-up data file with only histograms (no ROOT tree) using the calibration files specified in the input file. 
 

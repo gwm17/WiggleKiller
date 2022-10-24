@@ -27,16 +27,41 @@
 
   KGH -- Jul19
 
+  More clean up. Restructure a bit. GWM -- Oct. 2022
+
 */
 
 #ifndef FP_KINEMATICS
 #define FP_KINEMATICS
 
+#include <cstdint>
+
 //requires (Z,A) for T, P, and E, as well as energy of P,
 // spectrograph angle of interest, and field value
-double Delta_Z(int ZT, int AT, int ZP, int AP, int ZE, int AE,
-	       double EP, double angle, double B); 
 
-double Wire_Dist();
+struct FPParameters
+{
+    uint64_t ZT = 0; //Target nucleus Z
+    uint64_t AT = 0; //Target nucleus A
+    uint64_t ZP = 0; //Projectile nucleus Z
+    uint64_t AP = 0; //Projectile nucleus A
+    uint64_t ZE = 0; //Ejectile nucleus Z
+    uint64_t AE = 0; //Ejectile nucleus A
+    double energyP = 0.0; //Projectile Kinetic Energy (MeV)
+    double spsAngle = 0.0; //SPS Lab angle (degrees)
+    double bField = 0.0; //SPS Magnetic Field (G)
+};
+
+struct XWeights
+{
+    double x1Weight = 0.0;
+    double x2Weight = 0.0;
+};
+
+double Delta_Z(const FPParameters& params); 
+
+static constexpr double Wire_Dist() { return 4.28625; }
+
+XWeights GetXWeights(const FPParameters& params);
 
 #endif

@@ -12,14 +12,14 @@ Gordon M. May 2021
 #include <cmath>
 
 CubicSpline::CubicSpline() :
-	validFlag(false)
+    m_isValid(false)
 {
 }
 
-CubicSpline::CubicSpline(std::string& filename) :
-	validFlag(false)
+CubicSpline::CubicSpline(const std::string &filename) :
+    m_isValid(false)
 {
-	ReadFile(filename);
+    ReadFile(filename);
 }
 
 CubicSpline::~CubicSpline() {}
@@ -28,178 +28,186 @@ CubicSpline::~CubicSpline() {}
 Expected file format is a naked (no header) single space separated table:
 x y\n
 */
-void CubicSpline::ReadFile(std::string& filename) {
-	std::ifstream input(filename);
-	if(!input.is_open()) {
-		std::cerr<<"Unable to open input data at CubicSpline::ReadFile from filename: "<<filename<<std::endl;
-		validFlag = false;
-		return;
-	}
+void CubicSpline::ReadFile(const std::string &filename)
+{
+    std::ifstream input(filename);
+    if (!input.is_open())
+    {
+        std::cerr << "Unable to open input data at CubicSpline::ReadFile from filename: " << filename << std::endl;
+        m_isValid = false;
+        return;
+    }
 
-	std::string junk;
-	//std::getline(input, junk);
+    std::string junk;
+    // std::getline(input, junk);
 
-	double x, y;
-	while(input>>x) {
-		input>>y;
-		data_x.push_back(x);
-		data_y.push_back(y);
-	}
+    double x, y;
+    std::vector<double> data_x, data_y;
+    while (input >> x)
+    {
+        input >> y;
+        data_x.push_back(x);
+        data_y.push_back(y);
+    }
 
-	if(data_x.size() != data_y.size()) {
-		std::cerr<<"Error in CubicSpline::ReadFile! Number of x points not equal to number of y points!"<<std::endl;
-		validFlag = false;
-		return;
-	}
+    if (data_x.size() != data_y.size())
+    {
+        std::cerr << "Error in CubicSpline::ReadFile! Number of x points not equal to number of y points!" << std::endl;
+        m_isValid = false;
+        return;
+    }
 
-	validFlag = true;
+    m_isValid = true;
 
-	input.close();
+    input.close();
 
-	MakeSplines();
+    MakeSplines(data_x, data_y);
 }
 
 /*
 After data is read in splines can be solved. Each data point is referred to as a knot. Endpoint conditions are
 derivatives of neighbors must be equal and second derivatives must be zero (natural cubic splines). Solved using gaussian elimination.
 */
-void CubicSpline::MakeSplines() {
-	if(!validFlag) {
-		std::cerr<<"Error at CubicSpline::MakeSplines! Unable to generate splines without first initializing data."<<std::endl;
-		return;
-	}
+void CubicSpline::MakeSplines(const std::vector<double>& x, const std::vector<double>& y)
+{
+    if (!m_isValid)
+    {
+        std::cerr << "Error at CubicSpline::MakeSplines! Unable to generate splines without first initializing data." << std::endl;
+        return;
+    }
 
-	int knots = data_x.size();
+    std::size_t knots = x.size();
 
-	//Matrix and vector data init
-	double** a = new double*[knots];
-	for(int i=0; i<knots; i++) {
-		a[i] = new double[knots];
-	}
-	double* b = new double[knots];
-	double* k = new double[knots];
+    // Matrix and vector data init
+    double **a = new double *[knots];
+    for (int i = 0; i < knots; i++)
+    {
+        a[i] = new double[knots];
+    }
+    double *b = new double[knots];
+    double *k = new double[knots];
 
-	Spline s;
-	splines.clear();
-	double x0, x1, x2;
-	double y0, y1, y2;
+    Spline spline;
+    m_splineList.clear();
+    double x0, x1, x2;
+    double y0, y1, y2;
 
-	//Setup matrix eqn.
-	for(int i=0; i<knots; i++) {
-		if(i == 0) {
-			x1 = data_x[i];
-			x2 = data_x[i+1];
-			y1 = data_y[i];
-			y2 = data_y[i+1];
-			a[i][i] = 2.0/(x2-x1);
-			a[i][i+1] = 1.0/(x2-x1);
-			b[i] = 3.0*(y2-y1)/(std::pow((x2-x1), 2.0));
-      		s.x1 = x1; s.x2 = x2;
-      		s.y1 = y1; s.y2 = y2;
-      		splines.push_back(s);
-		} else if(i == (knots-1)) {
-			x0 = data_x[i-1];
-			x1 = data_x[i];
-      		y0 = data_y[i-1];
-      		y1 = data_y[i];
-      		a[i][i-1] = 1.0/(x1-x0);
-      		a[i][i] = 2.0/(x1-x0);
-      		b[i] = 3.0*(y1-y0)/(std::pow((x1-x0), 2.0));
-		} else {
-	    	x0 = data_x[i-1]; 
-	    	x1 = data_x[i]; 
-	    	x2 = data_x[i+1];
-      		y0 = data_y[i-1];
-      		y1 = data_y[i];
-      		y2 = data_y[i+1];
-      		a[i][i-1] = 1.0/(x1-x0);
-      		a[i][i] = 2.0/(x1-x0)+2.0/(x2-x1);
-      		a[i][i+1] = 1.0/(x2-x1);
-      		b[i] = 3.0*(y1-y0)/(std::pow((x1-x0), 2.0))+3.0*(y2-y1)/(std::pow((x2-x1), 2.0));
-      		s.x1 = x1; s.x2 = x2;
-      		s.y1 = y1; s.y2 = y2;
-      		splines.push_back(s);
-		}
-	}
+    //Setup matrix equations
 
-	//solve for curvature vector k using gaussian elimination
-	a[0][1] /= a[0][0];
-	b[0] /= a[0][0];
-	for(int i=1; i<(knots-1); i++) {
-		a[i][i+1] /= a[i][i]-a[i][i-1]*a[i-1][i];
-   	 	b[i] = (b[i] - a[i][i-1]*b[i-1])/(a[i][i]-a[i][i-1]*a[i-1][i]);
-	}
-	int g1 = knots-1;
-  	int g2 = knots-2;
-  	b[g1] = (b[g1]-a[g1][g2]*b[g2])/(a[g1][g1]-a[g1][g2]*a[g2][g1]);
+    //for first step in spline
+    x1 = x[0];
+    x2 = x[1];
+    y1 = y[0];
+    y2 = y[1];
+    a[0][0] = 2.0 / (x2 - x1);
+    a[0][1] = 1.0 / (x2 - x1);
+    b[0] = 3.0 * (y2 - y1) / (std::pow((x2 - x1), 2.0));
+    spline.x1 = x1;
+    spline.x2 = x2;
+    spline.y1 = y1;
+    spline.y2 = y2;
+    m_splineList.push_back(spline);
 
-  	k[g1] = b[g1];
-  	for(int i=(knots-2); i>=0; i--) {
-    	k[i] = b[i] - a[i][i+1]*k[i+1];
-  	}
+    // Setup non-edge matrix elements
+    std::size_t lastIndex = knots - 1;
+    for (std::size_t i = 1; i < lastIndex; i++)
+    {
+        x0 = x[i - 1];
+        x1 = x[i];
+        x2 = x[i + 1];
+        y0 = y[i - 1];
+        y1 = y[i];
+        y2 = y[i + 1];
+        a[i][i - 1] = 1.0 / (x1 - x0);
+        a[i][i] = 2.0 / (x1 - x0) + 2.0 / (x2 - x1);
+        a[i][i + 1] = 1.0 / (x2 - x1);
+        b[i] = 3.0 * (y1 - y0) / (std::pow((x1 - x0), 2.0)) + 3.0 * (y2 - y1) / (std::pow((x2 - x1), 2.0));
+        spline.x1 = x1;
+        spline.x2 = x2;
+        spline.y1 = y1;
+        spline.y2 = y2;
+        m_splineList.push_back(spline);
+    }
 
-  	//Fill the spline data
-  	for(unsigned int i=0; i<splines.size(); i++) {
-  		splines[i].k1 = k[i];
-  		splines[i].k2 = k[i+1];
-  	}
+    //For last step in spline
+    x0 = x[lastIndex - 1];
+    x1 = x[lastIndex];
+    y0 = y[lastIndex - 1];
+    y1 = y[lastIndex];
+    a[lastIndex][lastIndex - 1] = 1.0 / (x1 - x0);
+    a[lastIndex][lastIndex] = 2.0 / (x1 - x0);
+    b[lastIndex] = 3.0 * (y1 - y0) / (std::pow((x1 - x0), 2.0));
 
-  	//deallocate
-  	delete[] b;
-  	delete[] k;
-  	for(int i=0; i<knots; i++) {
-  		delete[] a[i];
-  	}
-  	delete[] a;
+    // solve for curvature vector k using gaussian elimination
+    a[0][1] /= a[0][0];
+    b[0] /= a[0][0];
+    for (int i = 1; i < (knots - 1); i++)
+    {
+        a[i][i + 1] /= a[i][i] - a[i][i - 1] * a[i - 1][i];
+        b[i] = (b[i] - a[i][i - 1] * b[i - 1]) / (a[i][i] - a[i][i - 1] * a[i - 1][i]);
+    }
+    int g1 = knots - 1;
+    int g2 = knots - 2;
+    b[g1] = (b[g1] - a[g1][g2] * b[g2]) / (a[g1][g1] - a[g1][g2] * a[g2][g1]);
+
+    k[g1] = b[g1];
+    for (int i = (knots - 2); i >= 0; i--)
+    {
+        k[i] = b[i] - a[i][i + 1] * k[i + 1];
+    }
+
+    // Fill the spline data
+    for (unsigned int i = 0; i < m_splineList.size(); i++)
+    {
+        m_splineList[i].k1 = k[i];
+        m_splineList[i].k2 = k[i + 1];
+    }
+
+    // deallocate
+    delete[] b;
+    delete[] k;
+    for (int i = 0; i < knots; i++)
+    {
+        delete[] a[i];
+    }
+    delete[] a;
 }
 
-double CubicSpline::Evaluate(double x) {
-	if(!validFlag) {
-		std::cerr<<"Error at CubicSpline::Evaluate! Unable to evaluate without first generating splines."<<std::endl;
-		return 0.0;
-	}
+double CubicSpline::Evaluate(double x)
+{
+    if (!m_isValid)
+    {
+        std::cerr << "Error at CubicSpline::Evaluate! Unable to evaluate without first generating splines." << std::endl;
+        return 0.0;
+    }
 
-	Spline s;
-	for(unsigned int i=0; i<splines.size(); i++) {
-		auto& spline = splines[i];
-		if(x >= spline.x1 && x < spline.x2) {
-			s = spline;
-			break;
-		} else if (i == (splines.size() -1)) {
-			//std::cerr<<"Error at CubicSpline::Evaluate! Input x value: "<<x<<" is not within the spline range min: "<<splines[0].x1<<" max: "<<splines[splines.size()-1].x2<<std::endl;
-			return 0.0;
-		}
-	}
+    for (auto& spline : m_splineList)
+    {
+        if (x >= spline.x1 && x <= spline.x2)
+            return spline.Evaluate(x);
+    }
 
-	double t = (x-s.x1)/(s.x2-s.x1);
-    double a = s.k1*(s.x2-s.x1)-(s.y2-s.y1);
-    double b = -s.k2*(s.x2-s.x1)+(s.y2-s.y1);
-    return (1.0-t)*s.y1+t*s.y2+t*(1.0-t)*((1.0-t)*a+t*b);
+    // std::cerr<<"Error at CubicSpline::Evaluate! Input x value: "<<x<<" is not within the spline range min: "<<m_splineList[0].x1<<" max: "<<m_splineList[m_splineList.size()-1].x2<<std::endl;
+    return 0.0;
 }
 
-//Purely for plotting in ROOT, do not use for caluculations. 
-double CubicSpline::EvaluateROOT(double* x, double* p) {
-	if(!validFlag) {
-		std::cerr<<"Error at CubicSpline::Evaluate! Unable to evaluate without first generating splines."<<std::endl;
-		return 0.0;
-	}
+// Purely for plotting in ROOT, do not use for caluculations.
+// Note that for splines the parameter pointer p is unused
+double CubicSpline::EvaluateROOT(double *x, double *p)
+{
+    if (!m_isValid)
+    {
+        std::cerr << "Error at CubicSpline::Evaluate! Unable to evaluate without first generating splines." << std::endl;
+        return 0.0;
+    }
 
-	double xval = x[0];
-	Spline s;
-	for(unsigned int i=0; i<splines.size(); i++) {
-		auto& spline = splines[i];
-		if(xval >= spline.x1 && xval < spline.x2) {
-			s = spline;
-			break;
-		} else if (i == (splines.size() -1)) {
-			//std::cerr<<"Error at CubicSpline::Evaluate! Input x value: "<<x<<" is not within the spline range min: "<<splines[0].x1<<" max: "<<splines[splines.size()-1].x2<<std::endl;
-			return 0.0;
-		}
-	}
+    double xval = x[0]; //Ugh ROOT
+    for (auto& spline : m_splineList)
+    {
+        if (xval >= spline.x1 && xval <= spline.x2)
+            return spline.Evaluate(xval);
+    }
 
-	double t = (xval-s.x1)/(s.x2-s.x1);
-    double a = s.k1*(s.x2-s.x1)-(s.y2-s.y1);
-    double b = -s.k2*(s.x2-s.x1)+(s.y2-s.y1);
-    return (1.0-t)*s.y1+t*s.y2+t*(1.0-t)*((1.0-t)*a+t*b);
+    // std::cerr<<"Error at CubicSpline::EvaluateRoot! Input x value: "<<x<<" is not within the spline range min: "<<m_splineList[0].x1<<" max: "<<m_splineList[m_splineList.size()-1].x2<<std::endl;
+    return 0.0;
 }
-

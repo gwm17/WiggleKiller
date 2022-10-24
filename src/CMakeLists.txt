@@ -21,6 +21,10 @@ target_sources(WiggleKiller PRIVATE
     WiggleCorrector.cpp
     WiggleKiller.h
     WiggleKiller.cpp
+    RandomGenerator.h
+    RandomGenerator.cpp
+    Histogrammer.h
+    Histogrammer.cpp
     main.cpp
 )
 

@@ -14,24 +14,41 @@ Written by G.W. McCann Aug. 2020
 #include <string>
 #include <unordered_map>
 
-class MassLookup {
+static constexpr uint64_t SzudzikPairing(uint64_t i, uint64_t j)
+{
+    return i >= j ? i*i + i + j : j*j +i;
+}
 
-  public:
-    MassLookup();
+class MassLookup
+{
+public:
+
+    struct NucData
+    {
+        std::string symbol = "";
+        double mass = 0.0;
+        uint64_t Z = 0;
+        uint64_t A = 0;
+    };
+
+    static const MassLookup& GetInstance() { return *s_instance; }
+
     ~MassLookup();
-    double FindMass(int Z, int A);
-    std::string FindSymbol(int Z, int A);
+    double FindMass(uint64_t Z, uint64_t A) const;
+    std::string FindSymbol(uint64_t Z, uint64_t A) const;
 
-  private:
-    std::unordered_map<std::string, double> massTable;
-    std::unordered_map<int, std::string> elementTable;
+private:
+    MassLookup();
 
+    static MassLookup* s_instance;
+
+    std::unordered_map<uint64_t, NucData> m_dataMap;
     //constants
-    static constexpr double u_to_mev = 931.4940954;
-    static constexpr double electron_mass = 0.000548579909;
+    static constexpr double s_u2MeV = 931.4940954;
+    static constexpr double s_eMass = 0.000548579909;
     
 };
 
-//static instance for use throught program
-static MassLookup MASS;
+
+
 #endif

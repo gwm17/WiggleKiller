@@ -10,5 +10,6 @@ images/
 lib/
 bin/
 build/
+etc/
 
 !.gitignore
